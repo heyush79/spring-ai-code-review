@@ -3,6 +3,9 @@ using the Ollama API since it is free to use unlike Open AI API which is paid.
 In this project I have used Spring AI feature of spring boot to integrate the AI API with the code. The API reads the input from the client and gives the reponse on the 
 piece of code provided with the language used. Unlike OpenAI API, the orca mini model is bit slow therfore it takes up some time to give back the response.
 Currently I am only having the review feature but I will be adding RAG pipeline to this to get background knowledge as well.
+Used Spring MVC and thymeleaf for frontend check below:
+<img width="1897" height="916" alt="image" src="https://github.com/user-attachments/assets/aa74ea6e-443a-4cd9-a343-aa5d10f0b18b" />
+
 
 <img width="1012" height="689" alt="image" src="https://github.com/user-attachments/assets/8ac6859a-70d0-4bb5-8083-56d317c41c5d" />
 
