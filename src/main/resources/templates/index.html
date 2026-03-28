@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring AI Code Review - Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <h1 class="nav-brand">Spring AI Code Review</h1>
+        <ul class="nav-menu">
+            <li><a href="/" class="nav-link active">Dashboard</a></li>
+            <li><a href="/upload" class="nav-link">Upload Documents</a></li>
+            <li><a href="/review" class="nav-link">Code Review</a></li>
+            <li><a href="/view-documents" class="nav-link">Documents</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <section class="hero">
+        <h2>Welcome to AI Code Review Assistant</h2>
+        <p>Intelligent code review powered by Ollama and Retrieval-Augmented Generation</p>
+    </section>
+
+    <section class="features">
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>📤 Upload Guidelines</h3>
+                <p>Upload coding guidelines, documentation, and best practices</p>
+                <a href="/upload" class="btn btn-primary">Get Started</a>
+            </div>
+            <div class="feature-card">
+                <h3>🔍 Smart Review</h3>
+                <p>Get AI-powered code reviews with context from your documents</p>
+                <a href="/review" class="btn btn-primary">Review Code</a>
+            </div>
+            <div class="feature-card">
+                <h3>📚 Manage Documents</h3>
+                <p>View and manage all uploaded reference documents</p>
+                <a href="/view-documents" class="btn btn-primary">View Docs</a>
+            </div>
+            <div class="feature-card">
+                <h3>⚡ Fast & Efficient</h3>
+                <p>In-memory caching provides 20-80x faster context retrieval</p>
+                <a href="#" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <h3>How It Works</h3>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h4>Upload Documents</h4>
+                <p>Upload your coding guidelines and best practices</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h4>Submit Code</h4>
+                <p>Paste the code you want reviewed with its language</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h4>Get Insights</h4>
+                <p>Receive AI-powered review based on your guidelines</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<footer class="footer">
+    <p>&copy; 2024 Spring AI Code Review. Powered by Ollama and PostgreSQL</p>
+</footer>
+</body>
+</html>

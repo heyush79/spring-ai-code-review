@@ -1,0 +1,30 @@
+server:
+    port: 8080
+spring:
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: orca-mini
+      embedding:
+        options:
+          model: nomic-embed-text
+  datasource:
+    url: jdbc:postgresql://localhost:5433/ai_review
+    username: postgres
+    password: **********
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8

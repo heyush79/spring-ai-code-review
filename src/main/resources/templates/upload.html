@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Documents - Spring AI Code Review</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <h1 class="nav-brand">Spring AI Code Review</h1>
+        <ul class="nav-menu">
+            <li><a href="/" class="nav-link">Dashboard</a></li>
+            <li><a href="/upload" class="nav-link active">Upload Documents</a></li>
+            <li><a href="/review" class="nav-link">Code Review</a></li>
+            <li><a href="/view-documents" class="nav-link">Documents</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <section class="form-section">
+        <h2>Upload Reference Documents</h2>
+        <p class="description">Upload documents that will be used as context for code reviews</p>
+
+        <form id="uploadForm" enctype="multipart/form-data" class="upload-form">
+            <div class="form-group">
+                <label for="file">Select File</label>
+                <input type="file" id="file" name="file" required accept=".txt,.md,.java,.py,.js,.ts,.xml">
+                <small>Supported formats: txt, md, java, py, js, ts, xml</small>
+            </div>
+
+            <div class="form-group">
+                <label for="type">Document Type</label>
+                <select id="type" name="type" required>
+                    <option value="">-- Select Document Type --</option>
+                    <option value="GUIDELINE">Coding Guideline</option>
+                    <option value="CODE">Code Example</option>
+                    <option value="DOCUMENTATION">Documentation</option>
+                    <option value="COMMIT_HISTORY">Commit History</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Upload Document</button>
+        </form>
+
+        <div id="uploadStatus" class="message-area"></div>
+    </section>
+
+    <section class="recent-uploads">
+        <h3>Recent Uploads</h3>
+        <div id="uploadsList" class="uploads-list">
+            <p class="loading">Loading recent uploads...</p>
+        </div>
+    </section>
+</div>
+
+<footer class="footer">
+    <p>&copy; 2024 Spring AI Code Review. Powered by Ollama and PostgreSQL</p>
+</footer>
+
+<script th:inline="javascript">
+    const form = document.getElementById('uploadForm');
+    const statusDiv = document.getElementById('uploadStatus');
+    const uploadsList = document.getElementById('uploadsList');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('/documents/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showMessage('Document uploaded successfully!', 'success');
+                form.reset();
+                loadRecentUploads();
+            } else {
+                const error = await response.text();
+                showMessage('Upload failed: ' + error, 'error');
+            }
+        } catch (error) {
+            showMessage('Upload error: ' + error.message, 'error');
+        }
+    });
+
+    function showMessage(message, type) {
+        statusDiv.innerHTML = `<div class="message message-${type}">${message}</div>`;
+        setTimeout(() => {
+            statusDiv.innerHTML = '';
+        }, 5000);
+    }
+
+    async function loadRecentUploads() {
+        try {
+            const response = await fetch('/documents');
+            const documents = await response.json();
+            
+            if (documents.length === 0) {
+                uploadsList.innerHTML = '<p>No documents uploaded yet</p>';
+                return;
+            }
+
+            const html = documents.slice(0, 5).map(doc => `
+                <div class="upload-item">
+                    <div class="upload-info">
+                        <h4>${doc.name}</h4>
+                        <p class="document-type">${doc.type}</p>
+                        <small>${new Date(doc.uploadedAt).toLocaleString()}</small>
+                    </div>
+                    <div class="upload-size">
+                        ${(doc.content.length / 1024).toFixed(2)} KB
+                    </div>
+                </div>
+            `).join('');
+
+            uploadsList.innerHTML = html;
+        } catch (error) {
+            uploadsList.innerHTML = `<p class="error">Failed to load uploads: ${error.message}</p>`;
+        }
+    }
+
+    // Load recent uploads on page load
+    loadRecentUploads();
+    // Refresh every 10 seconds
+    setInterval(loadRecentUploads, 10000);
+</script>
+</body>
+</html>

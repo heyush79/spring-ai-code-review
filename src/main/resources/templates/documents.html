@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents - Spring AI Code Review</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <h1 class="nav-brand">Spring AI Code Review</h1>
+        <ul class="nav-menu">
+            <li><a href="/" class="nav-link">Dashboard</a></li>
+            <li><a href="/upload" class="nav-link">Upload Documents</a></li>
+            <li><a href="/review" class="nav-link">Code Review</a></li>
+            <li><a href="/view-documents" class="nav-link active">Documents</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <section class="documents-section">
+        <h2>Reference Documents</h2>
+        <p class="description">View all uploaded documents used for AI code review context</p>
+
+        <div class="documents-controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search documents..." class="search-input">
+            </div>
+            <div class="filter-box">
+                <select id="filterType" class="filter-select">
+                    <option value="">All Types</option>
+                    <option value="GUIDELINE">Guidelines</option>
+                    <option value="CODE">Code Examples</option>
+                    <option value="DOCUMENTATION">Documentation</option>
+                    <option value="COMMIT_HISTORY">Commit History</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="documentsList" class="documents-grid">
+            <p class="loading">Loading documents...</p>
+        </div>
+    </section>
+</div>
+
+<footer class="footer">
+    <p>&copy; 2024 Spring AI Code Review. Powered by Ollama and PostgreSQL</p>
+</footer>
+
+<!-- Modal for viewing document content -->
+<div id="documentModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 id="modalTitle"></h3>
+        <p id="modalMeta"></p>
+        <div id="modalBody" class="modal-body"></div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    let allDocuments = [];
+
+    const searchInput = document.getElementById('searchInput');
+    const filterType = document.getElementById('filterType');
+    const documentsList = document.getElementById('documentsList');
+    const modal = document.getElementById('documentModal');
+    const closeBtn = document.querySelector('.close');
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    searchInput.addEventListener('input', filterDocuments);
+    filterType.addEventListener('change', filterDocuments);
+
+    async function loadDocuments() {
+        try {
+            const response = await fetch('/documents');
+            allDocuments = await response.json();
+            displayDocuments(allDocuments);
+        } catch (error) {
+            documentsList.innerHTML = `<p class="error">Failed to load documents: ${error.message}</p>`;
+        }
+    }
+
+    function filterDocuments() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const typeFilter = filterType.value;
+
+        const filtered = allDocuments.filter(doc => {
+            const matchesSearch = doc.name.toLowerCase().includes(searchTerm) ||
+                                doc.content.toLowerCase().includes(searchTerm);
+            const matchesType = typeFilter === '' || doc.type === typeFilter;
+            return matchesSearch && matchesType;
+        });
+
+        displayDocuments(filtered);
+    }
+
+    function displayDocuments(documents) {
+        if (documents.length === 0) {
+            documentsList.innerHTML = '<p class="empty-state">No documents found</p>';
+            return;
+        }
+
+        const html = documents.map(doc => `
+            <div class="document-card">
+                <div class="document-header">
+                    <h4>${escapeHtml(doc.name)}</h4>
+                    <span class="document-badge ${doc.type.toLowerCase()}">${doc.type}</span>
+                </div>
+                <div class="document-meta">
+                    <small>${(doc.content.length / 1024).toFixed(2)} KB</small>
+                    <small>${new Date(doc.uploadedAt).toLocaleDateString()}</small>
+                </div>
+                <p class="document-preview">${escapeHtml(doc.content.substring(0, 100))}...</p>
+                <button class="btn btn-secondary btn-small view-document-btn" 
+                    data-id="${doc.id}" 
+                    data-name="${escapeHtml(doc.name)}" 
+                    data-type="${doc.type}" 
+                    data-uploaded="${new Date(doc.uploadedAt).toLocaleString()}" 
+                    data-content="${escapeHtml(doc.content)}">
+                    View Full
+                </button>
+            </div>
+        `).join('');
+
+        documentsList.innerHTML = html;
+        
+        // Attach event listeners to all View Full buttons
+        document.querySelectorAll('.view-document-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                viewDocument(
+                    this.dataset.id,
+                    this.dataset.name,
+                    this.dataset.type,
+                    this.dataset.uploaded,
+                    this.dataset.content
+                );
+            });
+        });
+    }
+
+    function viewDocument(id, name, type, uploadedAt, content) {
+        document.getElementById('modalTitle').textContent = name;
+        document.getElementById('modalMeta').textContent = `Type: ${type} | Uploaded: ${uploadedAt}`;
+        document.getElementById('modalBody').innerHTML = `<pre>${content}</pre>`;
+        modal.style.display = 'block';
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Load documents on page load
+    loadDocuments();
+    // Refresh every 15 seconds
+    setInterval(loadDocuments, 15000);
+</script>
+</body>
+</html>

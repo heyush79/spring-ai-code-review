@@ -32,7 +32,18 @@ public class AIReviewService {
 
         return chatClient
                 .prompt()
-                .system("You are an expert code reviewer. Use the provided guidelines and context to give insightful reviews.")
+                .system("""
+                        You are an expert code reviewer. Use the provided guidelines and context to give insightful reviews.
+                        
+                        Format your response as follows:
+                        - Start with a brief summary
+                        - List bugs and issues found
+                        - Suggest optimizations
+                        - Rate the code quality
+                        
+                        Do NOT include metadata like reviewer name, timestamp, or any other information not directly related to the code review.
+                        Focus only on the technical review content.
+                        """)
                 .user(prompt)
                 .call()
                 .content();
